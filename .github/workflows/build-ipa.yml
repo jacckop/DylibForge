@@ -11,7 +11,7 @@ permissions:
 jobs:
   build:
     name: Build unsigned IPA
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
       - name: Checkout
@@ -49,6 +49,11 @@ jobs:
           rm -rf Payload DylibForge-unsigned.ipa
           mkdir -p Payload
           cp -R "$APP_PATH" Payload/
+
+          echo "Checking built Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "Payload/DylibForge.app/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "Payload/DylibForge.app/Info.plist"
+
           zip -qry DylibForge-unsigned.ipa Payload
 
           if [ ! -f "DylibForge-unsigned.ipa" ]; then
@@ -67,14 +72,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -e
-
-          TAG="build-${{ github.run_number }}"
+          TAG="build-${{ github.run_id }}-${{ github.run_attempt }}"
           TITLE="DylibForge Build ${{ github.run_number }}"
+
+          cat > release_notes.md <<EOF
+          Unsigned IPA built automatically by GitHub Actions.
+
+          Bundle Identifier: com.jacckop.dylibforge
+          Commit: ${{ github.sha }}
+          Branch: ${{ github.ref_name }}
+          EOF
 
           gh release create "$TAG" DylibForge-unsigned.ipa \
             --repo "${{ github.repository }}" \
             --title "$TITLE" \
-            --notes "Unsigned IPA built automatically by GitHub Actions.
-
-          Commit: ${{ github.sha }}
-          Branch: ${{ github.ref_name }}"
+            --notes-file release_notes.md
