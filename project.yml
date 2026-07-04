@@ -1,6 +1,6 @@
 name: DylibForge
 options:
-  bundleIdPrefix: com.yagami
+  bundleIdPrefix: com.jacckop
   deploymentTarget:
     iOS: "16.0"
   createIntermediateGroups: true
@@ -17,7 +17,7 @@ targets:
       - path: DylibForge
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.yagami.dylibforge
+        PRODUCT_BUNDLE_IDENTIFIER: com.jacckop.dylibforge
         PRODUCT_NAME: DylibForge
         INFOPLIST_FILE: DylibForge/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
