@@ -1,13 +1,9 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct ContentView: View {
     @StateObject private var viewModel = AppViewModel()
     @State private var showImporter = false
 
-    private var dylibContentTypes: [UTType] {
-        [UTType(filenameExtension: "dylib") ?? .data, .data, .item]
-    }
 
     private var hasInvalidChanges: Bool {
         viewModel.items.contains { $0.isChanged && !$0.canPatch }
@@ -38,18 +34,17 @@ struct ContentView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .navigationBar)
-            .fileImporter(
-                isPresented: $showImporter,
-                allowedContentTypes: dylibContentTypes,
-                allowsMultipleSelection: false
-            ) { result in
-                switch result {
-                case .success(let urls):
-                    guard let url = urls.first else { return }
-                    viewModel.importFile(from: url)
-                case .failure(let error):
-                    viewModel.banner = error.localizedDescription
-                }
+            .sheet(isPresented: $showImporter) {
+                DylibDocumentPicker(
+                    onPick: { url in
+                        showImporter = false
+                        viewModel.importFile(from: url)
+                    },
+                    onCancel: {
+                        showImporter = false
+                    }
+                )
+                .ignoresSafeArea()
             }
         }
         .environment(\.layoutDirection, .rightToLeft)
